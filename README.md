@@ -36,7 +36,7 @@ English docs: [README.en.md](README.en.md).
 
 ## 安装
 
-从 [Releases](https://github.com/ywddd/grok-inspection/releases) 下载与你的 CPA 平台匹配的压缩包：
+从 [Releases](https://github.com/Hkxtor/grok-inspection/releases) 下载与你的 CPA 平台匹配的压缩包：
 
 | 平台 | 文件 |
 |------|------|

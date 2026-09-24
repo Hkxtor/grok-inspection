@@ -36,7 +36,7 @@ Chinese documentation remains in [README.md](README.md).
 
 ## Install
 
-Download the package for your CPA platform from [Releases](https://github.com/ywddd/grok-inspection/releases):
+Download the package for your CPA platform from [Releases](https://github.com/Hkxtor/grok-inspection/releases):
 
 | Platform | File |
 |----------|------|
