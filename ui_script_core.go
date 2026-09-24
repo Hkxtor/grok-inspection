@@ -95,9 +95,6 @@ const uiScriptCore = `  const WORKERS_MIN = 1;
       return new TextDecoder().decode(out);
     } catch (_) { return raw; }
   }
-  function tryParseJSON(text) {
-    try { return JSON.parse(text); } catch (_) { return null; }
-  }
   function storageCandidates() {
     const list = [];
     try { list.push(window.localStorage); } catch (_) {}
@@ -110,35 +107,14 @@ const uiScriptCore = `  const WORKERS_MIN = 1;
     } catch (_) {}
     return list;
   }
-  function readStorageItem(store, name) {
-    try { return store && store.getItem ? store.getItem(name) : null; } catch (_) { return null; }
-  }
   function extractKeyFromPanelStorage() {
     try {
       const stores = storageCandidates();
       for (const store of stores) {
-        // Zustand persist key used by Management Center auth store.
-        const authRaw = readStorageItem(store, 'cli-proxy-auth');
-        if (authRaw) {
-          const parsed = tryParseJSON(deobfuscatePanelValue(authRaw));
-          const key = (parsed && parsed.state && parsed.state.managementKey)
-            || (parsed && parsed.managementKey)
-            || '';
-          if (String(key).trim()) return String(key).trim();
-        }
-        // Legacy plaintext / obfuscated single-key entries.
-        for (const name of ['managementKey', 'cli-proxy-management-key', 'CPA_MANAGEMENT_KEY', 'management_password']) {
-          const raw = readStorageItem(store, name);
-          if (!raw) continue;
-          const plain = deobfuscatePanelValue(raw);
-          const parsed = tryParseJSON(plain);
-          if (typeof parsed === 'string' && parsed.trim()) return parsed.trim();
-          if (parsed && typeof parsed === 'object') {
-            const k = parsed.managementKey || parsed.password || parsed.key || '';
-            if (String(k).trim()) return String(k).trim();
-          }
-          if (plain && plain.indexOf(PANEL_ENC_PREFIX) !== 0 && plain.trim()) return plain.trim();
-        }
+        // 统一交给 ui_script_auth.go 的解析器：只认管理中心官方的 cli-proxy-auth
+        // （兼旧版遗留单值键），读到不确定的内容一律当“没有密钥”。
+        const key = giResolveManagementKey(store);
+        if (key) return key;
       }
     } catch (_) {}
     return '';
@@ -150,11 +126,12 @@ const uiScriptCore = `  const WORKERS_MIN = 1;
     if (fromPanel) return fromPanel;
     try {
       const sess = sessionStorage.getItem(KEY_STORAGE) || '';
-      if (sess && String(sess).trim()) return String(sess).trim();
+      // 只接受像密钥的值：历史遗留/误写入的内容不再被当成密钥发出去。
+      if (giLooksLikeManagementKey(sess)) return String(sess).trim();
     } catch (_) {}
     try {
       const local = localStorage.getItem(KEY_STORAGE) || '';
-      if (local && String(local).trim()) {
+      if (giLooksLikeManagementKey(local)) {
         try { sessionStorage.setItem(KEY_STORAGE, String(local).trim()); } catch (_) {}
         try { localStorage.removeItem(KEY_STORAGE); } catch (_) {}
         return String(local).trim();
@@ -184,7 +161,8 @@ const uiScriptCore = `  const WORKERS_MIN = 1;
     const again = loadStoredManagementKey();
     if (applyBootKey(again)) {
       updateAuthState();
-      if (hasManagementKey()) { refresh(); loadSchedule(); }
+      giResetBootHydrate();
+      bootManagementLoad();
     }
   }, ms));
   function setBtnLabel(el, text) {

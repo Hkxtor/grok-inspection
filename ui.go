@@ -8,7 +8,7 @@ import (
 func renderUIPage(pluginID string) []byte {
 	base := "/v0/management/plugins/" + pluginID
 	var b strings.Builder
-	b.Grow(len(uiDocHead) + len(uiCSS) + len(uiDocMid) + len(uiI18NJS) + len(uiScriptLang) +
+	b.Grow(len(uiDocHead) + len(uiCSS) + len(uiDocMid) + len(uiI18NJS) + len(uiScriptLang) + len(uiScriptAuth) +
 		len(uiScriptCore) + len(uiScriptInspect) + len(uiScriptSchedule) + len(uiScriptTable) +
 		len(uiScriptPoll) + len(uiScriptWire) + len(uiScriptBan) + len(uiDocTail) + len(base) + 64)
 	b.WriteString(uiDocHead)
@@ -17,6 +17,7 @@ func renderUIPage(pluginID string) []byte {
 	b.WriteString(uiI18NJS)
 	b.WriteString(uiScriptLang)
 	b.WriteString(fmt.Sprintf("  const BASE = %q;\n", base))
+	b.WriteString(uiScriptAuth)
 	b.WriteString(uiScriptCore)
 	b.WriteString(uiScriptInspect)
 	b.WriteString(uiScriptSchedule)

@@ -17,14 +17,30 @@ const uiScriptSchedule = `  const classLabel = {
   }
   const esc = escapeHtml;
   async function api(path, opts) {
-    const headers = { 'Content-Type': 'application/json' };
-    if (keyInput.value) headers.Authorization = 'Bearer ' + keyInput.value;
-    const res = await fetch(BASE + path, Object.assign({ headers }, opts || {}));
+    const key = String(keyInput.value || '').trim();
+    if (!key) {
+      // 没有密钥就绝不发请求：CPA 会把每次无密钥的管理访问也计成一次失败，
+      // 连续 5 次即临时封禁本机 IP（封禁期间密钥正确也会被拒）。
+      throw giManagementError('invalid_key', 0, t('need_key'));
+    }
+    // 管理路由必须带密钥；不再依赖浏览器缓存里的旧值做“隐式”尝试。
+    const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key };
+    let res;
+    try {
+      res = await fetch(BASE + path, Object.assign({ headers }, opts || {}));
+    } catch (networkError) {
+      throw giManagementError('network', 0, String((networkError && networkError.message) || networkError));
+    }
     const text = await res.text();
     let data = null;
     try { data = text ? JSON.parse(text) : null; } catch (_) { data = { raw: text }; }
     // 202 Accepted is success for async apply/action
-    if (!res.ok) throw new Error((data && (data.error || data.message)) || text || ('HTTP ' + res.status));
+    if (!res.ok) {
+      const failure = giClassifyManagementFailure(res.status, text);
+      // 鉴权失败立刻停表：继续轮询只会继续累加失败次数，把管理面板一起锁掉。
+      if (failure.kind === 'banned' || failure.kind === 'invalid_key') giBlockPolling(failure, false);
+      throw giManagementError(failure.kind, res.status, (data && (data.error || data.message)) || text || ('HTTP ' + res.status), failure.retrySeconds);
+    }
     return data;
   }
   let scheduleDirty = false;
@@ -117,18 +133,28 @@ const uiScriptSchedule = `  const classLabel = {
     const save = $('scheduleSaveBtn');
     if (save) save.disabled = !hasManagementKey();
   }
+  // 返回 null 表示成功；否则返回失败描述（供开页流程判断是否继续加载）。
   async function loadSchedule() {
     if (!hasManagementKey()) {
       renderSchedule({ enabled: false, action_ready: false }, true);
-      return;
+      return null;
     }
     try {
       const raw = await api('/schedule');
       const data = (raw && raw.result && typeof raw.result === 'object') ? raw.result : raw;
       renderSchedule(data, true);
+      giNoteSuccess();
+      return null;
     } catch (e) {
+      const failure = giAuthFailureOf(e);
+      if (failure) {
+        // 鉴权失败：先停表（提示交给调用方，避免同一条消息弹两次）。
+        giBlockPolling(failure, false);
+        return failure;
+      }
       const status = $('scheduleStatus');
       if (status) status.textContent = String(e.message || e);
+      return { kind: (e && e.kind) || 'error', status: 0, message: String((e && e.message) || e), retrySeconds: 0, auth: false };
     }
   }
   async function saveSchedule() {
@@ -201,7 +227,9 @@ const uiScriptSchedule = `  const classLabel = {
       renderSchedule(data, true);
       showOk(t('schedule_saved'));
     } catch (e) {
-      showErr(String(e.message || e));
+      const failure = giAuthFailureOf(e);
+      if (failure) giBlockPolling(failure, true);
+      else showErr(String(e.message || e));
       if (btn) btn.disabled = false;
     }
   }

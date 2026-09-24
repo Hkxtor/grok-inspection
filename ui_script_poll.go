@@ -1,6 +1,8 @@
 package main
 
 const uiScriptPoll = `  let pollTimer = null;
+  let pollInFlight = false;
+  let pollDelayMs = 0;
   const POLL_MS = 1200;
   // Full results are heavy at 1000+ accounts; keep light polls frequent, full list rarer while running.
   const LIVE_RESULTS_MS = 10000;
@@ -11,20 +13,35 @@ const uiScriptPoll = `  let pollTimer = null;
   let fullResultsSyncing = false;
   function stopPolling() {
     if (pollTimer != null) {
-      clearInterval(pollTimer);
+      clearTimeout(pollTimer);
       pollTimer = null;
     }
   }
+  // 自调度轮询：同一时刻只允许一个请求在飞；
+  // 识别到鉴权失败（giAuthBlocked）后永不重新起表，直到成功刷新过一次。
   function startPolling() {
+    if (giAuthBlocked) { stopPolling(); return; }
     if (pollTimer != null) return;
-    // Light polls omit results[] — progress only.
-    pollTimer = setInterval(() => {
-      if (confirmOpen) return; // modal open: keep UI responsive for cancel/ok
-      refresh({ light: true });
-    }, POLL_MS);
+    const delayMs = pollDelayMs > 0 ? pollDelayMs : POLL_MS;
+    pollDelayMs = 0;
+    pollTimer = setTimeout(pollTick, delayMs);
+  }
+  async function pollTick() {
+    pollTimer = null;
+    if (giAuthBlocked) return;
+    if (confirmOpen) { startPolling(); return; } // modal open: keep UI responsive for cancel/ok
+    if (pollInFlight) { startPolling(); return; }
+    pollInFlight = true;
+    try {
+      // Light polls omit results[] — progress only.
+      await refresh({ light: true });
+    } finally {
+      pollInFlight = false;
+    }
   }
   // Only poll while a server job is active; idle pages do not keep hitting /status.
   function syncPolling(snap) {
+    if (giAuthBlocked) { stopPolling(); return; }
     const unbanRun = !!(snap && snap.unban && snap.unban.running);
     if (snap && (snap.running || snap.applying || unbanRun)) startPolling();
     else stopPolling();
@@ -85,6 +102,9 @@ const uiScriptPoll = `  let pollTimer = null;
       if (!(data.apply_failures || []).length && pendingOps.size === 0 && $('error').className === 'err') {
         $('error').textContent = '';
       }
+      // 先清熔断状态，再让 syncPolling 决定是否继续轮询：
+      // 反过来写会让「封禁解除后手动刷新成功」无法重新起表。
+      giNoteSuccess();
       syncPolling(data);
       // Avoid expensive table re-render under an open modal (cancel feels stuck).
       if (!confirmOpen) render();
@@ -121,8 +141,15 @@ const uiScriptPoll = `  let pollTimer = null;
         }
       }
     } catch (e) {
+      const failure = giAuthFailureOf(e);
+      if (failure) {
+        // 鉴权失败：停表 + 提示，绝不再自动重试。
+        giBlockPolling(failure, true);
+        return;
+      }
       showErr(String(e.message || e));
-      // Keep polling only if we still believe a job is active.
+      // 服务端/网络抖动只做退避，不当作密钥问题；仍认为任务在跑才继续。
+      pollDelayMs = giNoteSoftFailure((e && e.kind) || 'network');
       syncPolling(state.snapshot);
     }
   }

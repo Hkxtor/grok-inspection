@@ -250,8 +250,9 @@ const uiScriptInspect = `  function parseSampleInputs() {
     keySource = 'manual';
     persistManagementKey(keyInput.value);
     updateAuthState();
-    refresh();
-    loadSchedule();
+    // 手动改密钥后重做一次开页加载（先一条 /schedule 校验鉴权）。
+    giResetBootHydrate();
+    bootManagementLoad();
   });
   // If a key is available, keep plugin storage in sync for next open.
   if (keyInput.value.trim()) persistManagementKey(keyInput.value);

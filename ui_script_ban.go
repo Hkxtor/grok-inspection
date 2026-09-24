@@ -594,16 +594,11 @@ async function setAutobanEnabled(on) {
       banState.pageSize = Number(prefs.banPageSize);
     }
   }
-  // One-shot load on open; polling starts only when status reports running/applying.
-  refresh();
-
-  // 启动时若已自动读到 Key，直接加载自动禁用状态（无需再手填）
+  // 开页只做一次串行加载：bootManagementLoad() 先用一条 /schedule 校验鉴权，
+  // 通过后才刷新巡检状态与禁用列表（失败次数按 IP 累计，并发请求会加速封禁）。
   syncKeyHint();
   updateAuthState();
-  if (hasManagementKey()) {
-    loadBans();
-    loadSchedule();
-  }
+  bootManagementLoad();
 
   (function bindLang() {
     const sel = document.getElementById('langSelect');

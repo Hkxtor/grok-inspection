@@ -482,8 +482,11 @@ func executeManagementRequest(method, baseURL, path string, body []byte, passwor
 		return resp.StatusCode, nil, &managementTransportError{err: errRead}
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		// 失败次数是按 IP 累计的：被 CPA 明确拒绝的密钥与封禁窗口内不再重试。
+		noteManagementAuthFailure(password, resp.StatusCode, raw)
 		return resp.StatusCode, raw, fmt.Errorf("CPA management API returned HTTP %d: %s", resp.StatusCode, strings.TrimSpace(string(raw)))
 	}
+	noteManagementSuccess(password)
 	return resp.StatusCode, raw, nil
 }
 
@@ -494,6 +497,10 @@ func callCPAManagementWithAuth(method, path string, body []byte, password string
 	}
 	if password == "" {
 		return 0, nil, fmt.Errorf("CPA management password is unavailable (set MANAGEMENT_PASSWORD on CPA process)")
+	}
+	// 失败的鉴权按 IP 计数：被拒的密钥 / 封禁窗口内直接快速失败，不再发请求。
+	if errBlocked := managementCredentialBlocked(password); errBlocked != nil {
+		return 0, nil, errBlocked
 	}
 	_, explicitlyConfigured := configuredManagementBaseURL()
 	baseURL := resolveManagementBaseURL(headers)

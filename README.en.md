@@ -67,6 +67,8 @@ plugins:
 
 Restart CPA, open **Grok Account Inspection**, and enter the CPA Management Key.
 
+> On a same-origin deployment the page reuses the key saved by the management center, so manual entry is optional. See [Management key and temporary IP bans](#management-key-and-temporary-ip-bans) for details.
+
 ## Docker
 
 If CPA runs in Docker, copy the plugin into the container plugin directory and restart. Use your real container name and plugin path:
@@ -85,6 +87,25 @@ CPA_MANAGEMENT_BASE_URL=http://127.0.0.1:<actual-port>
 ```
 
 Use `https://` when TLS is enabled. With an explicit value, a failed request will not fall back to the browser request Origin.
+
+## Management key and temporary IP bans
+
+The page prefers the Management Center key stored in the same-origin `localStorage` (`cli-proxy-auth`, the panel's `enc::v1::` obfuscation format) and only asks for manual entry when that is unavailable. If "remember password" is off in the management center, the page will not pick up a key automatically.
+
+CPA counts every failed management authentication per client IP for **any** management route, including the plugin's own `/v0/management/...`. Five failures ban that IP for ~30 minutes, the ban rejects even the correct key, and `127.0.0.1` is not exempt. On a local install the browser, the plugin page and the management panel share that IP, so a stale key plus a background poll loop locks the operator out of the panel itself (the panel reports `IP banned due to too many failed attempts. Try again in …`). This is intentional upstream behaviour (issue #4013, closed as not planned), so the plugin's job is to never manufacture failed attempts.
+
+Current behaviour:
+
+- Only the official `cli-proxy-auth` entry is read (single or double JSON wrapping tolerated), plus the panel's legacy single-value `managementKey`. Guessed legacy names such as `authToken`, `cli-proxy-management-key` and `management_password` are no longer read — if you had pasted a key under one of them, enter it once in the page input instead (kept for the tab session). JSON fragments, multi-line or oversized values and undecodable ciphertext all count as "no key" — **no request is sent**
+- Opening the page performs exactly one `/schedule` auth validation request; the inspection status and auto-ban list load only after it succeeds. Polling is self-scheduled and never overlaps
+- `invalid management key`, `missing management key` and `IP banned …` stop polling immediately: an invalid key is dropped from plugin storage with a re-login hint, while a ban only reports the remaining time and keeps the key you typed
+- 5xx and network failures back off 30s / 60s / 120s and are never treated as key problems
+
+Recovery:
+
+1. Close the plugin page that is still polling (otherwise it re-triggers the ban right after it expires)
+2. Restarting CPA clears the ban **immediately** (it only lives in process memory), or wait out the countdown
+3. Log in again at the management center with "remember password"; note that a `cliproxy run --password` local password is not necessarily stable across restarts
 
 ## Usage
 
