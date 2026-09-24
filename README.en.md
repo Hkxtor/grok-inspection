@@ -12,7 +12,7 @@ This is a **pure vibe-coding** plugin: it works and is practical, but the code m
 - **If you prefer not to rely on vibe-coded plugins**, use **CPA Manager Plus** (or a similar management panel) for account inspection / ops instead.
 - This plugin is a lightweight, **optional** Grok/xAI inspection add-on — not an official reference implementation.
 
-Version: `0.1.22` · Menu: **Grok Account Inspection**
+Version: `0.1.23` · Menu: **Grok Account Inspection**
 
 ## Language
 The management UI is **bilingual and toggleable**:
@@ -159,6 +159,11 @@ Inspection and bulk actions run in the background. Closing or switching pages do
 ## License
 
 MIT
+
+This repository is a fork of [ywddd/grok-inspection](https://github.com/ywddd/grok-inspection); upstream copyright stays with the original author (see `LICENSE`). Customizations on top of upstream v0.1.20:
+
+- v0.1.21: the management key is read only from the management center's official `cli-proxy-auth` entry, no request is sent without a key, opening the page performs a single auth validation request, polling is self-scheduled with one in-flight request, and any authentication failure (including a temporary local IP ban) trips the circuit breaker immediately — see [Management key and temporary IP bans](#management-key-and-temporary-ip-bans)
+- v0.1.22 / v0.1.23: plugin metadata repository link and author point at this repository (`Hkxtor`)
 
 ## Community
 
