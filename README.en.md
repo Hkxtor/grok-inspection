@@ -69,6 +69,21 @@ Restart CPA, open **Grok Account Inspection**, and enter the CPA Management Key.
 
 > On a same-origin deployment the page reuses the key saved by the management center, so manual entry is optional. See [Management key and temporary IP bans](#management-key-and-temporary-ip-bans) for details.
 
+### Plugin store (third-party source)
+
+This repository ships a `registry.json`, so it can be added to CPA as a third-party plugin store source for search, install and upgrade:
+
+```yaml
+plugins:
+  store-sources:
+    - "https://raw.githubusercontent.com/Hkxtor/grok-inspection/main/registry.json"
+```
+
+The store lists the official source and this source under the same plugin id: the official entry points at the upstream repository (older release), this one points at this repository. CPA decides ownership from the plugin config's `store` block and **never installs across sources** — if the plugin was originally installed from the official source, a cross-source upgrade is rejected (`installed plugin belongs to a different store source`). To switch, back up the config block and pick one:
+
+- Uninstall in the store, then install again (the plugin config block is removed, so settings must be re-entered)
+- Edit the `store` block by hand: delete `source-id` / `source-name` (keeping them requires them to match the real source, otherwise CPA treats the source as unknown and refuses to upgrade), point `source-url` at the URL above, and sync `version` / `release-tag` / `repository` / `homepage` to the new release
+
 ## Docker
 
 If CPA runs in Docker, copy the plugin into the container plugin directory and restart. Use your real container name and plugin path:

@@ -69,6 +69,21 @@ plugins:
 
 > 同源部署下页面会自动复用管理中心保存的 Key，不必手填；密钥复用与「本机临时封禁」的细节见下方 [管理密钥与临时封禁](#管理密钥与临时封禁)。
 
+### 插件商店（第三方源）
+
+本仓库自带 `registry.json`，可作为 CPA 的第三方插件源直接搜索安装与升级：
+
+```yaml
+plugins:
+  store-sources:
+    - "https://raw.githubusercontent.com/Hkxtor/grok-inspection/main/registry.json"
+```
+
+商店会同时列出官方源与本源的同名条目：官方源指向上游仓库（版本较旧），本源指向本仓库。CPA 按插件配置里 `store` 块记录的来源判定归属，**不会跨源安装**——若该插件此前是从官方源安装的，跨源更新会被拒绝（`installed plugin belongs to a different store source`）。要切到本源，先备份配置块，然后二选一：
+
+- 在商店里卸载后重新安装（该插件配置块会被清掉，需重新填写设置）
+- 手动改 `store` 块：删掉 `source-id` / `source-name`（保留就必须与真实源一致，否则 CPA 判为「来源未知」并拒绝更新），把 `source-url` 改为上面的地址，并把 `version` / `release-tag` / `repository` / `homepage` 同步为新版本
+
 ## Docker
 
 如果 CPA 运行在 Docker 中，把插件拷到容器内的插件目录后重启容器。容器名和插件路径以你的实际环境为准，例如：
