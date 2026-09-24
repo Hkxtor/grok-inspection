@@ -14,7 +14,7 @@ import (
 const (
 	pluginName            = "grok-inspection"
 	pluginDisplayName     = "Grok 账号巡检"
-	pluginVersion         = "0.1.21"
+	pluginVersion         = "0.1.22"
 	resourceContentType   = "text/html; charset=utf-8"
 	jsonContentType       = "application/json; charset=utf-8"
 	managementRoutePrefix = "/plugins/" + pluginName
@@ -64,7 +64,7 @@ func pluginRegistration() registration {
 			Name:             pluginDisplayName,
 			Version:          pluginVersion,
 			Author:           "ywddd",
-			GitHubRepository: "https://github.com/ywddd/grok-inspection",
+			GitHubRepository: "https://github.com/Hkxtor/grok-inspection",
 			ConfigFields: []pluginapi.ConfigField{
 				{Name: "autoban_enabled", Type: pluginapi.ConfigFieldTypeBoolean, Description: T(LangZH, "cfg_autoban_enabled")},
 				{Name: "fallback_hours", Type: pluginapi.ConfigFieldTypeInteger, Description: T(LangZH, "cfg_fallback_hours")},
