@@ -6,7 +6,7 @@
       "name": "Grok Inspection",
       "description": "Background xAI/Grok account inspection for CPA, with permission, quota, login, and health classification; supports full/incremental/classify-scoped re-inspect and bulk actions.",
       "author": "Hkxtor",
-      "version": "0.1.22",
+      "version": "0.1.23",
       "repository": "https://github.com/Hkxtor/grok-inspection",
       "homepage": "https://github.com/Hkxtor/grok-inspection",
       "license": "MIT",
