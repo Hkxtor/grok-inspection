@@ -85,7 +85,7 @@ func TestDispatchScheduleSaveWarmsPortCacheForHeadlessCall(t *testing.T) {
 	// POST /schedule only persists config; it must not require a management dial.
 	resp := dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodPost,
-		Path:   "/v0/management/plugins/grok-inspection/schedule",
+		Path:   "/v0/management/plugins/hk-grok-inspection/schedule",
 		Body:   []byte(`{"enabled":false,"interval_minutes":60}`),
 		Headers: http.Header{
 			"Authorization": []string{"Bearer page-key"},
@@ -199,7 +199,7 @@ func TestDispatchUnbanUsesHostPortWithoutOrigin(t *testing.T) {
 
 	resp := dispatchManagement(pluginapi.ManagementRequest{
 		Method:  http.MethodPost,
-		Path:    "/v0/management/plugins/grok-inspection/unban",
+		Path:    "/v0/management/plugins/hk-grok-inspection/unban",
 		Body:    []byte(`{"auth_id":"host-only-unban"}`),
 		Headers: liveHeaders,
 	})
@@ -237,10 +237,10 @@ func TestDispatchUnbanUsesHostPortWithoutOrigin(t *testing.T) {
 
 func TestManagementRouteHeadersDropsSecretsAndKeepsHostOrigin(t *testing.T) {
 	headers := http.Header{
-		"Authorization": []string{"Bearer secret"},
-		"Cookie":        []string{"a=b"},
-		"Host":          []string{"cpa.local:1109"},
-		"Origin":        []string{"https://cpa.local:1109/path"},
+		"Authorization":    []string{"Bearer secret"},
+		"Cookie":           []string{"a=b"},
+		"Host":             []string{"cpa.local:1109"},
+		"Origin":           []string{"https://cpa.local:1109/path"},
 		"X-Forwarded-Host": []string{"evil:443"},
 	}
 	// Origin with path must be rejected by normalize; only Host remains.

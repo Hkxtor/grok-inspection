@@ -226,6 +226,16 @@ func classifyProbe(input classifyInput) classifyResult {
 			return classifyResult{Classification: "spending_limit", Action: action, Reason: fmt.Sprintf("%s (HTTP %d)", reason, status)}
 		}
 	}
+	// HTTP 426 Upgrade Required: probe client version older than the server
+	// floor. This is a plugin-side defect, never an account problem — always
+	// keep and never recommend disable/delete.
+	if status == http.StatusUpgradeRequired {
+		reason := T(input.Lang, "client_version_outdated")
+		if detail := strings.TrimSpace(firstNonEmpty(input.ChatError, input.ChatCode)); detail != "" {
+			reason = fmt.Sprintf("%s: %s", reason, truncateErrMessage(detail, 200))
+		}
+		return classifyResult{Classification: "probe_error", Action: "keep", Reason: fmt.Sprintf("%s (HTTP %d)", reason, status)}
+	}
 	// Account-level permission denial only (not bare 403 / WAF / unrelated codes).
 	// Never reclassify bare/unknown 402 via permission text heuristics.
 	if status != http.StatusPaymentRequired && isAccountLevelPermissionDenied(status, input.ChatCode, input.ChatError) {

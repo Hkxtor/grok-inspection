@@ -45,6 +45,10 @@ var messages = map[string]map[Lang]string{
 		LangZH: "临时限流 (HTTP 429)，建议稍后重试",
 		LangEN: "Temporarily rate-limited (HTTP 429); retry later",
 	},
+	"client_version_outdated": {
+		LangZH: "Grok CLI 客户端版本过旧，服务端要求升级（巡检插件会自动刷新版本）",
+		LangEN: "Grok CLI client version too old; server requires upgrade (plugin refreshes version automatically)",
+	},
 	"permission_denied": {
 		LangZH: "对话权限被拒绝",
 		LangEN: "Chat permission denied",
@@ -171,8 +175,8 @@ var messages = map[string]map[Lang]string{
 		LangEN: "Persist auto-ban state to state_file.",
 	},
 	"cfg_state_file": {
-		LangZH: "自动禁用状态 JSON 路径；留空时使用 data/grok-inspection/bans.json。",
-		LangEN: "Auto-ban state JSON path; empty uses data/grok-inspection/bans.json.",
+		LangZH: "自动禁用状态 JSON 路径；留空时使用 data/hk-grok-inspection/bans.json。",
+		LangEN: "Auto-ban state JSON path; empty uses data/hk-grok-inspection/bans.json.",
 	},
 	"cfg_log_matches": {
 		LangZH: "是否记录自动禁用命中日志。",

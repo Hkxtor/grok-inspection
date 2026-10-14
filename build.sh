@@ -17,7 +17,7 @@ go test ./... -count=1
 CGO_ENABLED=1 go build \
   -buildvcs=false \
   -buildmode=c-shared \
-  -o "dist/grok-inspection.${ext}" \
+  -o "dist/hk-grok-inspection.${ext}" \
   .
 
-echo "Built dist/grok-inspection.${ext}"
+echo "Built dist/hk-grok-inspection.${ext}"

@@ -34,24 +34,28 @@ English docs: [README.en.md](README.en.md).
 - 支持导出当前筛选结果为 JSON/TXT
 - 实时自动禁用（默认开启）：额度用尽 24h 后自动恢复；402/403/401 需手动解禁
 
+> **v0.1.24 起插件标识由 `grok-inspection` 更名为 `hk-grok-inspection`**（避免与插件商店同名插件冲突）。
+> 升级后请将 CPA 配置中的插件键名同步改为 `hk-grok-inspection`，并替换插件目录中的旧 .so/.dll/.dylib 文件。
+> 旧默认路径 `data/grok-inspection/bans.json` 中的封禁状态会在首次启动时自动迁移到 `data/hk-grok-inspection/bans.json`。
+
 ## 安装
 
 从 [Releases](https://github.com/Hkxtor/grok-inspection/releases) 下载与你的 CPA 平台匹配的压缩包：
 
 | 平台 | 文件 |
 |------|------|
-| Linux amd64 | `grok-inspection_*_linux_amd64.zip` |
-| Linux arm64 | `grok-inspection_*_linux_arm64.zip` |
-| FreeBSD amd64 | `grok-inspection_*_freebsd_amd64.zip` |
-| Windows amd64 | `grok-inspection_*_windows_amd64.zip` |
-| macOS arm64 | `grok-inspection_*_darwin_arm64.zip` |
+| Linux amd64 | `hk-grok-inspection_*_linux_amd64.zip` |
+| Linux arm64 | `hk-grok-inspection_*_linux_arm64.zip` |
+| FreeBSD amd64 | `hk-grok-inspection_*_freebsd_amd64.zip` |
+| Windows amd64 | `hk-grok-inspection_*_windows_amd64.zip` |
+| macOS arm64 | `hk-grok-inspection_*_darwin_arm64.zip` |
 
 解压后把插件文件放到 CPA 插件目录：
 
 ```text
-grok-inspection.so      # Linux
-grok-inspection.dll     # Windows
-grok-inspection.dylib   # macOS
+hk-grok-inspection.so      # Linux
+hk-grok-inspection.dll     # Windows
+hk-grok-inspection.dylib   # macOS
 ```
 
 在 CPA 配置中启用插件：
@@ -60,7 +64,7 @@ grok-inspection.dylib   # macOS
 plugins:
   enabled: true
   configs:
-    grok-inspection:
+    hk-grok-inspection:
       enabled: true
       priority: 1
 ```
@@ -89,7 +93,7 @@ plugins:
 如果 CPA 运行在 Docker 中，把插件拷到容器内的插件目录后重启容器。容器名和插件路径以你的实际环境为准，例如：
 
 ```bash
-docker cp ./grok-inspection.so <容器名>:<插件目录>/grok-inspection.so
+docker cp ./hk-grok-inspection.so <容器名>:<插件目录>/hk-grok-inspection.so
 docker restart <容器名>
 ```
 
@@ -150,7 +154,7 @@ CPA 对**任意管理路由**（包括插件自身的 `/v0/management/...`）在
 
 ## 数据说明
 
-- 巡检结果会保存在 CPA 工作目录下的 `data/grok-inspection/results.json`
+- 巡检结果会保存在 CPA 工作目录下的 `data/hk-grok-inspection/results.json`
 - 结果文件只保存展示所需信息，不保存完整 token
 - 实时自动禁用默认开启：命中 free-usage-exhausted / personal-team-blocked:spending-limit / permission-denied / 401 时会自动禁用；可在「实时自动禁用」页关闭。巡检页的建议操作仍需确认后执行
 - 删除操作会删除对应 Auth 凭证，恢复需要重新登录

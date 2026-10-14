@@ -14,7 +14,7 @@ import (
 func TestManagementStatusReturnsJSON(t *testing.T) {
 	response := dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodGet,
-		Path:   "/v0/management/plugins/grok-inspection/status",
+		Path:   "/v0/management/plugins/hk-grok-inspection/status",
 	})
 
 	if got := response.Headers.Get("content-type"); !strings.Contains(got, "application/json") {
@@ -36,7 +36,7 @@ func TestManagementStatusLightOmitsResults(t *testing.T) {
 
 	light := dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodGet,
-		Path:   "/v0/management/plugins/grok-inspection/status",
+		Path:   "/v0/management/plugins/hk-grok-inspection/status",
 		Query:  map[string][]string{"include_results": {"0"}},
 	})
 	body := string(light.Body)
@@ -52,7 +52,7 @@ func TestManagementStatusLightOmitsResults(t *testing.T) {
 
 	full := dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodGet,
-		Path:   "/v0/management/plugins/grok-inspection/status",
+		Path:   "/v0/management/plugins/hk-grok-inspection/status",
 		Query:  map[string][]string{"include_results": {"1"}},
 	})
 	if !strings.Contains(string(full.Body), `"results":[`) {
@@ -63,7 +63,7 @@ func TestManagementStatusLightOmitsResults(t *testing.T) {
 func TestResourceStatusReturnsHTML(t *testing.T) {
 	response := dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodGet,
-		Path:   "/v0/resource/plugins/grok-inspection/status",
+		Path:   "/v0/resource/plugins/hk-grok-inspection/status",
 	})
 
 	if got := response.Headers.Get("content-type"); !strings.Contains(got, "text/html") {
@@ -226,7 +226,7 @@ func TestApplyAcceptedAsync(t *testing.T) {
 	// Without candidates, apply returns conflict quickly (no hang).
 	response := dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodPost,
-		Path:   "/v0/management/plugins/grok-inspection/apply",
+		Path:   "/v0/management/plugins/hk-grok-inspection/apply",
 		Body:   []byte(`{}`),
 	})
 	if response.StatusCode != http.StatusConflict && response.StatusCode != http.StatusAccepted {
@@ -326,7 +326,7 @@ func TestManagementBansCountMatchesList(t *testing.T) {
 
 	resp := dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodGet,
-		Path:   "/v0/management/plugins/grok-inspection/bans",
+		Path:   "/v0/management/plugins/hk-grok-inspection/bans",
 	})
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("status=%d body=%s", resp.StatusCode, string(resp.Body))
@@ -373,7 +373,7 @@ func TestAutobanSettingsToggle(t *testing.T) {
 
 	resp := dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodPost,
-		Path:   "/v0/management/plugins/grok-inspection/autoban-settings",
+		Path:   "/v0/management/plugins/hk-grok-inspection/autoban-settings",
 		Body:   []byte(`{"enabled":true}`),
 	})
 	if resp.StatusCode != http.StatusOK {

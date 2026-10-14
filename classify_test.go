@@ -88,15 +88,18 @@ func TestPickModel(t *testing.T) {
 }
 
 func TestXAIInspectionHeadersMatchCLIProxyIdentity(t *testing.T) {
+	// Dynamic version: header must reflect GetXAIInspectionClientVersion.
+	restore := SetXAIInspectionClientVersionForTest("1.0.46")
+	defer restore()
 	headers := xaiInspectionHeaders("test-token", true)
 
 	if got := headers.Get("X-XAI-Token-Auth"); got != "xai-grok-cli" {
 		t.Fatalf("X-XAI-Token-Auth = %q", got)
 	}
-	if got := headers.Get("x-grok-client-version"); got != "0.2.93" {
+	if got := headers.Get("x-grok-client-version"); got != "1.0.46" {
 		t.Fatalf("x-grok-client-version = %q", got)
 	}
-	if got := headers.Get("User-Agent"); got != "xai-grok-workspace/0.2.93" {
+	if got := headers.Get("User-Agent"); got != "xai-grok-workspace/1.0.46" {
 		t.Fatalf("User-Agent = %q", got)
 	}
 	if got := headers.Get("x-grok-client-identifier"); got != "" {
@@ -104,6 +107,73 @@ func TestXAIInspectionHeadersMatchCLIProxyIdentity(t *testing.T) {
 	}
 	if got := headers.Get("Content-Type"); got != "application/json" {
 		t.Fatalf("Content-Type = %q", got)
+	}
+}
+
+func TestXAIInspectionClientVersionDefaultsAboveServerFloor(t *testing.T) {
+	version := GetXAIInspectionClientVersion()
+	if !acceptableXAIInspectionVersion(version) {
+		t.Fatalf("default/cached version %q not acceptable (floor %s)", version, XAIInspectionClientVersionServerFloor)
+	}
+}
+
+func TestParseXAINPMVersion(t *testing.T) {
+	cases := []struct {
+		name    string
+		body    string
+		want    string
+		wantErr bool
+	}{
+		{name: "latest", body: `{"version":"1.0.52"}`, want: "1.0.52"},
+		{name: "prerelease rejected", body: `{"version":"1.1.0-alpha.1"}`, wantErr: true},
+		{name: "below floor rejected", body: `{"version":"0.2.93"}`, wantErr: true},
+		{name: "missing version", body: `{"name":"@xai-official/grok"}`, wantErr: true},
+		{name: "empty body", body: "", wantErr: true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := parseXAINPMVersion(tc.body)
+			if tc.wantErr {
+				if err == nil {
+					t.Fatalf("expected error, got %q", got)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got != tc.want {
+				t.Fatalf("version = %q, want %q", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestXAIInspectionVersionAtLeast(t *testing.T) {
+	if !xaiInspectionVersionAtLeast("1.0.46", "1.0.13") {
+		t.Fatal("1.0.46 should be >= 1.0.13")
+	}
+	if !xaiInspectionVersionAtLeast("1.0.13", "1.0.13") {
+		t.Fatal("equal versions should pass")
+	}
+	if xaiInspectionVersionAtLeast("1.0.12", "1.0.13") {
+		t.Fatal("1.0.12 should be < 1.0.13")
+	}
+	if !xaiInspectionVersionAtLeast("2.0.0", "1.9.99") {
+		t.Fatal("2.0.0 should be >= 1.9.99")
+	}
+}
+
+func TestClassify426UpgradeRequiredKeepsAccount(t *testing.T) {
+	outcome := newProbeOutcome(apiCallResponse{
+		StatusCode: http.StatusUpgradeRequired,
+		Body:       `{"error":"client version 0.2.93 is too old; upgrade required"}`,
+	}, false, LangZH)
+	if outcome.Classified.Classification != "probe_error" || outcome.Classified.Action != "keep" {
+		t.Fatalf("got %+v", outcome.Classified)
+	}
+	if !strings.Contains(outcome.Classified.Reason, "426") {
+		t.Fatalf("reason = %q", outcome.Classified.Reason)
 	}
 }
 

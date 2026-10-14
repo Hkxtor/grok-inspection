@@ -16,7 +16,7 @@ New-Item -ItemType Directory -Path "dist" -Force | Out-Null
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 $env:CGO_ENABLED = "1"
-& go build -buildvcs=false -buildmode=c-shared -o "dist/grok-inspection.$extension" .
+& go build -buildvcs=false -buildmode=c-shared -o "dist/hk-grok-inspection.$extension" .
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-Write-Host "Built dist/grok-inspection.$extension"
+Write-Host "Built dist/hk-grok-inspection.$extension"

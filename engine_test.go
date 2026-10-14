@@ -1365,7 +1365,7 @@ func TestApplyIsAsyncAndStatusStaysResponsive(t *testing.T) {
 	// status path is pure memory and must not wait on apply/delete work
 	resp := dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodGet,
-		Path:   "/v0/management/plugins/grok-inspection/status",
+		Path:   "/v0/management/plugins/hk-grok-inspection/status",
 	})
 	if resp.StatusCode != http.StatusOK {
 		close(release)

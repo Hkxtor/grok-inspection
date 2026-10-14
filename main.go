@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	pluginName            = "grok-inspection"
+	pluginName            = "hk-grok-inspection"
 	pluginDisplayName     = "Grok 账号巡检"
-	pluginVersion         = "0.1.23"
+	pluginVersion         = "0.1.24"
 	resourceContentType   = "text/html; charset=utf-8"
 	jsonContentType       = "application/json; charset=utf-8"
 	managementRoutePrefix = "/plugins/" + pluginName

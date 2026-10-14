@@ -145,7 +145,7 @@ func TestBanDeleteCategoryOnlyDeletesMatchingAccounts(t *testing.T) {
 
 	resp := dispatchManagement(pluginapi.ManagementRequest{
 		Method:  http.MethodPost,
-		Path:    "/v0/management/plugins/grok-inspection/ban-delete",
+		Path:    "/v0/management/plugins/hk-grok-inspection/ban-delete",
 		Body:    []byte(`{"category":"quota"}`),
 		Headers: http.Header{"Authorization": []string{"Bearer test-pass"}},
 	})
@@ -531,7 +531,7 @@ func TestBanDeleteAPIErrorParityWithUnbanAll(t *testing.T) {
 	// invalid JSON
 	resp := dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodPost,
-		Path:   "/v0/management/plugins/grok-inspection/ban-delete",
+		Path:   "/v0/management/plugins/hk-grok-inspection/ban-delete",
 		Body:   []byte(`{`),
 	})
 	if resp.StatusCode != http.StatusBadRequest {
@@ -546,7 +546,7 @@ func TestBanDeleteAPIErrorParityWithUnbanAll(t *testing.T) {
 	// no accounts
 	resp = dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodPost,
-		Path:   "/v0/management/plugins/grok-inspection/ban-delete",
+		Path:   "/v0/management/plugins/hk-grok-inspection/ban-delete",
 		Body:   []byte(`{"category":"quota"}`),
 	})
 	if resp.StatusCode != http.StatusBadRequest {
@@ -570,7 +570,7 @@ func TestBanDeleteAPIErrorParityWithUnbanAll(t *testing.T) {
 	t.Cleanup(func() { releaseUnbanSlot(runID) })
 	resp = dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodPost,
-		Path:   "/v0/management/plugins/grok-inspection/ban-delete",
+		Path:   "/v0/management/plugins/hk-grok-inspection/ban-delete",
 		Body:   []byte(`{"category":"all"}`),
 	})
 	if resp.StatusCode != http.StatusConflict {
@@ -617,7 +617,7 @@ func TestBanDeleteUsesOriginRouteLikeUnban(t *testing.T) {
 	}
 	resp := dispatchManagement(pluginapi.ManagementRequest{
 		Method:  http.MethodPost,
-		Path:    "/v0/management/plugins/grok-inspection/ban-delete",
+		Path:    "/v0/management/plugins/hk-grok-inspection/ban-delete",
 		Body:    []byte(`{"auth_ids":["origin-del-1"]}`),
 		Headers: headers,
 	})
@@ -795,7 +795,7 @@ func TestBanDeleteReturns202WhileHostListBlocked(t *testing.T) {
 	started := time.Now()
 	resp := dispatchManagement(pluginapi.ManagementRequest{
 		Method:  http.MethodPost,
-		Path:    "/v0/management/plugins/grok-inspection/ban-delete",
+		Path:    "/v0/management/plugins/hk-grok-inspection/ban-delete",
 		Body:    []byte(`{"auth_ids":["blocked-host"]}`),
 		Headers: http.Header{"Authorization": []string{"Bearer test-pass"}},
 	})
@@ -1257,7 +1257,7 @@ func TestBanDeleteEmptyBodyRejected(t *testing.T) {
 
 	resp := dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodPost,
-		Path:   "/v0/management/plugins/grok-inspection/ban-delete",
+		Path:   "/v0/management/plugins/hk-grok-inspection/ban-delete",
 		Body:   []byte(`{}`),
 	})
 	if resp.StatusCode != http.StatusBadRequest {
@@ -1272,7 +1272,7 @@ func TestBanDeleteEmptyBodyRejected(t *testing.T) {
 
 	resp = dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodPost,
-		Path:   "/v0/management/plugins/grok-inspection/ban-delete",
+		Path:   "/v0/management/plugins/hk-grok-inspection/ban-delete",
 		Body:   []byte(`{"category":"not-a-real-cat"}`),
 	})
 	if resp.StatusCode != http.StatusBadRequest {

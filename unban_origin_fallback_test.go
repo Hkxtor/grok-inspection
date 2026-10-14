@@ -101,7 +101,7 @@ func TestDispatchUnbanUsesOriginWhenDefaultPortUnreachable(t *testing.T) {
 
 	resp := dispatchManagement(pluginapi.ManagementRequest{
 		Method:  http.MethodPost,
-		Path:    "/v0/management/plugins/grok-inspection/unban",
+		Path:    "/v0/management/plugins/hk-grok-inspection/unban",
 		Body:    []byte(`{"auth_id":"origin-unban-1"}`),
 		Headers: headers,
 	})
@@ -206,7 +206,7 @@ func TestDispatchUnbanAllUsesOriginWhenDefaultPortUnreachable(t *testing.T) {
 
 	resp := dispatchManagement(pluginapi.ManagementRequest{
 		Method:  http.MethodPost,
-		Path:    "/v0/management/plugins/grok-inspection/unban-all",
+		Path:    "/v0/management/plugins/hk-grok-inspection/unban-all",
 		Body:    []byte(`{"auth_ids":["origin-unban-all-1","origin-unban-all-2"]}`),
 		Headers: headers,
 	})
@@ -332,7 +332,7 @@ func TestDispatchUnbanConflictRedisableUsesOriginWhenDefaultPortUnreachable(t *t
 	go func() {
 		ch <- result{resp: dispatchManagement(pluginapi.ManagementRequest{
 			Method: http.MethodPost,
-			Path:   "/v0/management/plugins/grok-inspection/unban",
+			Path:   "/v0/management/plugins/hk-grok-inspection/unban",
 			Body:   []byte(`{"auth_id":"origin-conflict-1"}`),
 			Headers: http.Header{
 				"Authorization": []string{"Bearer page-password"},

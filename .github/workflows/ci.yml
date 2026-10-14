@@ -64,7 +64,7 @@ jobs:
           go build \
             -buildvcs=false \
             -buildmode=c-shared \
-            -o "dist/grok-inspection.${{ matrix.ext }}" \
+            -o "dist/hk-grok-inspection.${{ matrix.ext }}" \
             .
           ls -la dist
 
@@ -73,8 +73,8 @@ jobs:
       - name: Upload plugin artifact
         uses: actions/upload-artifact@v7
         with:
-          name: grok-inspection-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: dist/grok-inspection.${{ matrix.ext }}
+          name: hk-grok-inspection-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/hk-grok-inspection.${{ matrix.ext }}
           if-no-files-found: error
           retention-days: 30
 
@@ -103,16 +103,16 @@ jobs:
             "$GO" build \
               -buildvcs=false \
               -buildmode=c-shared \
-              -o "dist/grok-inspection.so" \
+              -o "dist/hk-grok-inspection.so" \
               .
-            "$GO" version -m "dist/grok-inspection.so" | tee build-info.txt
+            "$GO" version -m "dist/hk-grok-inspection.so" | tee build-info.txt
             grep -q "GOOS=freebsd" build-info.txt
             grep -q "GOARCH=amd64" build-info.txt
 
       - name: Upload plugin artifact
         uses: actions/upload-artifact@v7
         with:
-          name: grok-inspection-freebsd-amd64
-          path: dist/grok-inspection.so
+          name: hk-grok-inspection-freebsd-amd64
+          path: dist/hk-grok-inspection.so
           if-no-files-found: error
           retention-days: 30

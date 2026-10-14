@@ -15,10 +15,12 @@ import (
 const (
 	// xAI /v1/models currently only advertises grok-4.5; requesting that ID is remapped
 	// upstream to grok-4.5-build-free for free accounts. Direct model id grok-4.5-build-free returns 404.
-	defaultProbeModel          = "grok-4.5"
-	xaiResponsesURL            = "https://cli-chat-proxy.grok.com/v1/responses"
-	xaiChatCompletionsURL      = "https://cli-chat-proxy.grok.com/v1/chat/completions"
-	xaiInspectionClientVersion = "0.2.93"
+	defaultProbeModel     = "grok-4.5"
+	xaiResponsesURL       = "https://cli-chat-proxy.grok.com/v1/responses"
+	xaiChatCompletionsURL = "https://cli-chat-proxy.grok.com/v1/chat/completions"
+	// Probe client version is dynamic (GetXAIInspectionClientVersion): refreshed
+	// from npm in the background so cli-chat-proxy never rejects probes with
+	// HTTP 426. Fallback: DefaultXAIInspectionClientVersion (xai_version.go).
 
 	// host.http.do has no native timeout; wrap each call so one bad account cannot stall the whole job.
 	// Single host.http.do wall clock. 25s absorbs slow free-tier responses under concurrency.
@@ -237,12 +239,13 @@ func resolveProbeOutcome(primary, fallback probeOutcome, lang Lang) probeOutcome
 }
 
 func xaiInspectionHeaders(token string, jsonBody bool) http.Header {
+	clientVersion := GetXAIInspectionClientVersion()
 	headers := make(http.Header)
 	headers.Set("Authorization", "Bearer "+token)
 	headers.Set("Accept", "application/json")
 	headers.Set("X-XAI-Token-Auth", "xai-grok-cli")
-	headers.Set("x-grok-client-version", xaiInspectionClientVersion)
-	headers.Set("User-Agent", "xai-grok-workspace/"+xaiInspectionClientVersion)
+	headers.Set("x-grok-client-version", clientVersion)
+	headers.Set("User-Agent", "xai-grok-workspace/"+clientVersion)
 	if jsonBody {
 		headers.Set("Content-Type", "application/json")
 	}
@@ -302,6 +305,12 @@ func callHostAPICallRaw(authIndex, method, rawURL string, body []byte, jsonBody 
 	if errCall != nil {
 		return apiCallResponse{}, errCall
 	}
+	return decodeHostHTTPDoResult(result)
+}
+
+// decodeHostHTTPDoResult decodes a host.http.do callback result payload.
+// Shared by probe calls and the npm version refresher.
+func decodeHostHTTPDoResult(result json.RawMessage) (apiCallResponse, error) {
 	var resp struct {
 		StatusCode int                 `json:"StatusCode"`
 		Headers    map[string][]string `json:"Headers"`

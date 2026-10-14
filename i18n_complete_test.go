@@ -138,7 +138,7 @@ func TestStartStatusCodesStableAcrossLang(t *testing.T) {
 	for _, lang := range []string{"zh", "en"} {
 		resp := dispatchManagement(pluginapi.ManagementRequest{
 			Method: http.MethodPost,
-			Path:   "/v0/management/plugins/grok-inspection/start",
+			Path:   "/v0/management/plugins/hk-grok-inspection/start",
 			Body:   []byte(`{"workers":6,"lang":"` + lang + `"}`),
 		})
 		if resp.StatusCode != http.StatusConflict {
@@ -150,7 +150,7 @@ func TestStartStatusCodesStableAcrossLang(t *testing.T) {
 	for _, lang := range []string{"zh", "en"} {
 		resp := dispatchManagement(pluginapi.ManagementRequest{
 			Method: http.MethodPost,
-			Path:   "/v0/management/plugins/grok-inspection/start",
+			Path:   "/v0/management/plugins/hk-grok-inspection/start",
 			Body:   []byte(`{"workers":6,"incremental":true,"lang":"` + lang + `"}`),
 		})
 		if resp.StatusCode != http.StatusBadRequest {
@@ -161,7 +161,7 @@ func TestStartStatusCodesStableAcrossLang(t *testing.T) {
 	for _, lang := range []string{"zh", "en"} {
 		resp := dispatchManagement(pluginapi.ManagementRequest{
 			Method: http.MethodPost,
-			Path:   "/v0/management/plugins/grok-inspection/start",
+			Path:   "/v0/management/plugins/hk-grok-inspection/start",
 			Body:   []byte(`{"workers":99,"lang":"` + lang + `"}`),
 		})
 		if resp.StatusCode != http.StatusBadRequest {
@@ -201,20 +201,20 @@ func TestProbeTimeoutSentinelsAreLanguageAgnostic(t *testing.T) {
 }
 
 func TestPluginVersionIs016(t *testing.T) {
-	if pluginVersion != "0.1.23" {
-		t.Fatalf("pluginVersion = %q, want 0.1.23", pluginVersion)
+	if pluginVersion != "0.1.24" {
+		t.Fatalf("pluginVersion = %q, want 0.1.24", pluginVersion)
 	}
 	meta := pluginRegistration()
-	if meta.Metadata.Version != "0.1.23" {
+	if meta.Metadata.Version != "0.1.24" {
 		t.Fatalf("meta.Version = %q", meta.Metadata.Version)
 	}
 	readme := mustReadRepoFile(t, "README.md")
 	readmeEN := mustReadRepoFile(t, "README.en.md")
-	if !strings.Contains(readme, "0.1.23") {
-		t.Fatal("README.md missing 0.1.23")
+	if !strings.Contains(readme, "0.1.24") {
+		t.Fatal("README.md missing 0.1.24")
 	}
-	if !strings.Contains(readmeEN, "0.1.23") {
-		t.Fatal("README.en.md missing 0.1.23")
+	if !strings.Contains(readmeEN, "0.1.24") {
+		t.Fatal("README.en.md missing 0.1.24")
 	}
 	if strings.Contains(readme, "0.1.14") || strings.Contains(readmeEN, "0.1.14") {
 		t.Fatal("README still mentions 0.1.14")
@@ -238,7 +238,7 @@ func TestSnapshotLocalizesStoredReasons(t *testing.T) {
 
 	resp := dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodGet,
-		Path:   "/v0/management/plugins/grok-inspection/status",
+		Path:   "/v0/management/plugins/hk-grok-inspection/status",
 		Query:  map[string][]string{"include_results": {"1"}, "lang": {"en"}},
 	})
 	if resp.StatusCode != http.StatusOK {
@@ -597,7 +597,7 @@ func TestStartRejectsInvalidJSON(t *testing.T) {
 
 	resp := dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodPost,
-		Path:   "/v0/management/plugins/grok-inspection/start",
+		Path:   "/v0/management/plugins/hk-grok-inspection/start",
 		Body:   []byte(`{"workers":`), // truncated JSON
 	})
 	if resp.StatusCode != http.StatusBadRequest {
@@ -614,7 +614,7 @@ func TestStartRejectsInvalidJSON(t *testing.T) {
 	// Best-effort English when lang is visible in malformed body.
 	respEN := dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodPost,
-		Path:   "/v0/management/plugins/grok-inspection/start",
+		Path:   "/v0/management/plugins/hk-grok-inspection/start",
 		Body:   []byte(`{"lang":"en","workers":`),
 	})
 	if respEN.StatusCode != http.StatusBadRequest {
@@ -638,23 +638,23 @@ func TestApplyActionValidationLocalizedAndStableStatus(t *testing.T) {
 		zhKey  string
 	}{
 		{
-			name: "force invalid", path: "/v0/management/plugins/grok-inspection/apply",
+			name: "force invalid", path: "/v0/management/plugins/hk-grok-inspection/apply",
 			body: `{"lang":"zh","force_action":"nope","auth_indexes":["a"]}`, status: http.StatusBadRequest, zhKey: "force_action_invalid",
 		},
 		{
-			name: "force missing targets", path: "/v0/management/plugins/grok-inspection/apply",
+			name: "force missing targets", path: "/v0/management/plugins/hk-grok-inspection/apply",
 			body: `{"lang":"en","force_action":"disable"}`, status: http.StatusBadRequest, zhKey: "force_action_requires_targets",
 		},
 		{
-			name: "force no match", path: "/v0/management/plugins/grok-inspection/apply",
+			name: "force no match", path: "/v0/management/plugins/hk-grok-inspection/apply",
 			body: `{"lang":"zh","force_action":"disable","auth_indexes":["missing"]}`, status: http.StatusBadRequest, zhKey: "no_accounts_matched",
 		},
 		{
-			name: "no recommended", path: "/v0/management/plugins/grok-inspection/apply",
+			name: "no recommended", path: "/v0/management/plugins/hk-grok-inspection/apply",
 			body: `{"lang":"en"}`, status: http.StatusConflict, zhKey: "no_recommended_actions",
 		},
 		{
-			name: "action missing name", path: "/v0/management/plugins/grok-inspection/action",
+			name: "action missing name", path: "/v0/management/plugins/hk-grok-inspection/action",
 			body: `{"lang":"zh","disabled":true}`, status: http.StatusBadRequest, zhKey: "name_or_auth_required",
 		},
 	}
@@ -692,7 +692,7 @@ func TestApplyActionValidationLocalizedAndStableStatus(t *testing.T) {
 	for _, lang := range []string{"zh", "en"} {
 		resp := dispatchManagement(pluginapi.ManagementRequest{
 			Method: http.MethodPost,
-			Path:   "/v0/management/plugins/grok-inspection/apply",
+			Path:   "/v0/management/plugins/hk-grok-inspection/apply",
 			Body:   []byte(`{"lang":"` + lang + `","force_action":"bad","auth_indexes":["x"]}`),
 		})
 		if resp.StatusCode != http.StatusBadRequest {
@@ -737,7 +737,7 @@ func TestUIAriaLabelAndWorkersTitleI18n(t *testing.T) {
 func TestApplyInvalidJSONUsesI18n(t *testing.T) {
 	resp := dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodPost,
-		Path:   "/v0/management/plugins/grok-inspection/apply",
+		Path:   "/v0/management/plugins/hk-grok-inspection/apply",
 		Body:   []byte(`{"lang":"en",`),
 	})
 	if resp.StatusCode != http.StatusBadRequest {
@@ -830,7 +830,7 @@ func TestSnapshotLightLocalizesApplyFields(t *testing.T) {
 	// Light status (no results) still localizes apply/action fields.
 	resp := dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodGet,
-		Path:   "/v0/management/plugins/grok-inspection/status",
+		Path:   "/v0/management/plugins/hk-grok-inspection/status",
 		Query:  map[string][]string{"include_results": {"0"}, "lang": {"en"}},
 	})
 	if resp.StatusCode != http.StatusOK {
@@ -890,7 +890,7 @@ func TestStopUsesRequestLangForCancelAndApplyCurrent(t *testing.T) {
 
 	resp := dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodPost,
-		Path:   "/v0/management/plugins/grok-inspection/stop",
+		Path:   "/v0/management/plugins/hk-grok-inspection/stop",
 		Body:   []byte(`{"lang":"en"}`),
 	})
 	if resp.StatusCode != http.StatusOK {
@@ -926,7 +926,7 @@ func TestStopUsesRequestLangForCancelAndApplyCurrent(t *testing.T) {
 	// /status?lang=zh should re-localize stored English cancel reason.
 	status := dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodGet,
-		Path:   "/v0/management/plugins/grok-inspection/status",
+		Path:   "/v0/management/plugins/hk-grok-inspection/status",
 		Query:  map[string][]string{"include_results": {"1"}, "lang": {"zh"}},
 	})
 	var st struct {
@@ -959,7 +959,7 @@ func TestStopInvalidJSONReturns400(t *testing.T) {
 
 	resp := dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodPost,
-		Path:   "/v0/management/plugins/grok-inspection/stop",
+		Path:   "/v0/management/plugins/hk-grok-inspection/stop",
 		Body:   []byte(`{lang:`),
 	})
 	if resp.StatusCode != http.StatusBadRequest {
@@ -1085,7 +1085,7 @@ func TestStartSuccessLocalizesRetainedResults(t *testing.T) {
 
 	resp := dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodPost,
-		Path:   "/v0/management/plugins/grok-inspection/start",
+		Path:   "/v0/management/plugins/hk-grok-inspection/start",
 		Body:   []byte(`{"workers":2,"lang":"en"}`),
 	})
 	if resp.StatusCode != http.StatusOK {

@@ -80,13 +80,13 @@ jobs:
           go build \
             -buildvcs=false \
             -buildmode=c-shared \
-            -o "grok-inspection.${{ matrix.ext }}" \
+            -o "hk-grok-inspection.${{ matrix.ext }}" \
             .
 
       - name: Verify target platform
         shell: bash
         run: |
-          go version -m "grok-inspection.${{ matrix.ext }}" | tee build-info.txt
+          go version -m "hk-grok-inspection.${{ matrix.ext }}" | tee build-info.txt
           grep -q "GOOS=${{ matrix.goos }}" build-info.txt
           grep -q "GOARCH=${{ matrix.goarch }}" build-info.txt
 
@@ -94,8 +94,8 @@ jobs:
         id: package
         shell: pwsh
         run: |
-          $asset = "grok-inspection_${{ steps.release.outputs.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip"
-          Compress-Archive -Path "grok-inspection.${{ matrix.ext }}" -DestinationPath $asset -Force
+          $asset = "hk-grok-inspection_${{ steps.release.outputs.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip"
+          Compress-Archive -Path "hk-grok-inspection.${{ matrix.ext }}" -DestinationPath $asset -Force
           "asset=$asset" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Upload build artifact
@@ -148,9 +148,9 @@ jobs:
             "$GO" build \
               -buildvcs=false \
               -buildmode=c-shared \
-              -o "grok-inspection.so" \
+              -o "hk-grok-inspection.so" \
               .
-            "$GO" version -m "grok-inspection.so" | tee build-info.txt
+            "$GO" version -m "hk-grok-inspection.so" | tee build-info.txt
             grep -q "GOOS=freebsd" build-info.txt
             grep -q "GOARCH=amd64" build-info.txt
 
@@ -158,8 +158,8 @@ jobs:
         id: package
         shell: pwsh
         run: |
-          $asset = "grok-inspection_${{ steps.release.outputs.version }}_freebsd_amd64.zip"
-          Compress-Archive -Path "grok-inspection.so" -DestinationPath $asset -Force
+          $asset = "hk-grok-inspection_${{ steps.release.outputs.version }}_freebsd_amd64.zip"
+          Compress-Archive -Path "hk-grok-inspection.so" -DestinationPath $asset -Force
           "asset=$asset" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Upload build artifact

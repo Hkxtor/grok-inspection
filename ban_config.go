@@ -61,14 +61,14 @@ func defaultBanStateFile() string {
 	if dir := strings.TrimSpace(os.Getenv("GROK_INSPECTION_DATA_DIR")); dir != "" {
 		return filepath.Join(dir, "bans.json")
 	}
-	return filepath.Join("data", "grok-inspection", "bans.json")
+	return filepath.Join("data", "hk-grok-inspection", "bans.json")
 }
 
 func defaultRuntimeSettingsFile() string {
 	if dir := strings.TrimSpace(os.Getenv("GROK_INSPECTION_DATA_DIR")); dir != "" {
 		return filepath.Join(dir, "settings.json")
 	}
-	return filepath.Join("data", "grok-inspection", "settings.json")
+	return filepath.Join("data", "hk-grok-inspection", "settings.json")
 }
 
 func runtimeSettingsFile(cfg pluginConfig) string {
@@ -80,6 +80,9 @@ func runtimeSettingsFile(cfg pluginConfig) string {
 
 func legacyBanStateCandidates() []string {
 	out := []string{
+		// Pre-rename default (plugin id was grok-inspection): auto-migrate so
+		// upgrades keep ban state instead of silently starting empty.
+		filepath.Join("data", "grok-inspection", "bans.json"),
 		filepath.Join("data", "grok-autoban", "bans.json"),
 		filepath.Join("data", "bans.json"),
 		"bans.json",
@@ -247,6 +250,8 @@ func registerPlugin(raw []byte) error {
 		// before the schedule loop observes engine state.
 		engine.loadFromDisk()
 		startInspectionScheduleLoop()
+		// Keep the probe client version fresh so cli-chat-proxy never answers 426.
+		startXAIVersionUpdater()
 		pluginRegistered = true
 		return nil
 	}

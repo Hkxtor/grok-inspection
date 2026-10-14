@@ -34,24 +34,28 @@ Chinese documentation remains in [README.md](README.md).
 - Export filtered results as JSON/TXT
 - Real-time autoban (on by default): free-usage cools down after 24h; 402/403/401 need manual unban
 
+> **Since v0.1.24 the plugin id is renamed from `grok-inspection` to `hk-grok-inspection`** (avoids collision with the same-named plugin in the store).
+> After upgrading, rename the plugin key in your CPA config to `hk-grok-inspection` and replace the old .so/.dll/.dylib file in the plugin dir.
+> Ban state at the old default path `data/grok-inspection/bans.json` is auto-migrated to `data/hk-grok-inspection/bans.json` on first start.
+
 ## Install
 
 Download the package for your CPA platform from [Releases](https://github.com/Hkxtor/grok-inspection/releases):
 
 | Platform | File |
 |----------|------|
-| Linux amd64 | `grok-inspection_*_linux_amd64.zip` |
-| Linux arm64 | `grok-inspection_*_linux_arm64.zip` |
-| FreeBSD amd64 | `grok-inspection_*_freebsd_amd64.zip` |
-| Windows amd64 | `grok-inspection_*_windows_amd64.zip` |
-| macOS arm64 | `grok-inspection_*_darwin_arm64.zip` |
+| Linux amd64 | `hk-grok-inspection_*_linux_amd64.zip` |
+| Linux arm64 | `hk-grok-inspection_*_linux_arm64.zip` |
+| FreeBSD amd64 | `hk-grok-inspection_*_freebsd_amd64.zip` |
+| Windows amd64 | `hk-grok-inspection_*_windows_amd64.zip` |
+| macOS arm64 | `hk-grok-inspection_*_darwin_arm64.zip` |
 
 Extract the plugin binary into your CPA plugins directory:
 
 ```text
-grok-inspection.so      # Linux
-grok-inspection.dll     # Windows
-grok-inspection.dylib   # macOS
+hk-grok-inspection.so      # Linux
+hk-grok-inspection.dll     # Windows
+hk-grok-inspection.dylib   # macOS
 ```
 
 Enable it in CPA config:
@@ -60,7 +64,7 @@ Enable it in CPA config:
 plugins:
   enabled: true
   configs:
-    grok-inspection:
+    hk-grok-inspection:
       enabled: true
       priority: 1
 ```
@@ -89,7 +93,7 @@ The store lists the official source and this source under the same plugin id: th
 If CPA runs in Docker, copy the plugin into the container plugin directory and restart. Use your real container name and plugin path:
 
 ```bash
-docker cp ./grok-inspection.so <container>:<plugin-dir>/grok-inspection.so
+docker cp ./hk-grok-inspection.so <container>:<plugin-dir>/hk-grok-inspection.so
 docker restart <container>
 ```
 
@@ -151,7 +155,7 @@ Inspection and bulk actions run in the background. Closing or switching pages do
 
 ## Data
 
-- Results are stored at `data/grok-inspection/results.json` under the CPA working directory
+- Results are stored at `data/hk-grok-inspection/results.json` under the CPA working directory
 - Result files store display fields only, not full tokens
 - Real-time autoban is on by default: free-usage-exhausted / personal-team-blocked:spending-limit / permission-denied / 401 are auto-disabled (toggle off on the Autoban page). Inspection suggested actions still require confirmation
 - Delete removes the CPA auth credential; recovery requires re-login

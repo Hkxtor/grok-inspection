@@ -12,7 +12,7 @@ import (
 func TestApplyInvalidJSONReturns400(t *testing.T) {
 	resp := dispatchManagement(pluginapi.ManagementRequest{
 		Method: http.MethodPost,
-		Path:   "/v0/management/plugins/grok-inspection/apply",
+		Path:   "/v0/management/plugins/hk-grok-inspection/apply",
 		Body:   []byte(`{not-json`),
 	})
 	if resp.StatusCode != http.StatusBadRequest {

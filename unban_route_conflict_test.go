@@ -55,7 +55,7 @@ func TestDispatchUnbanConflictReturns409Not400(t *testing.T) {
 	go func() {
 		ch <- result{resp: dispatchManagement(pluginapi.ManagementRequest{
 			Method:  http.MethodPost,
-			Path:    "/v0/management/plugins/grok-inspection/unban",
+			Path:    "/v0/management/plugins/hk-grok-inspection/unban",
 			Body:    []byte(`{"auth_id":"route-ec1"}`),
 			Headers: http.Header{"Authorization": []string{"Bearer test-pass"}},
 		})}
@@ -115,7 +115,7 @@ func TestDispatchUnbanBusyStill409(t *testing.T) {
 
 	resp := dispatchManagement(pluginapi.ManagementRequest{
 		Method:  http.MethodPost,
-		Path:    "/v0/management/plugins/grok-inspection/unban",
+		Path:    "/v0/management/plugins/hk-grok-inspection/unban",
 		Body:    []byte(`{"auth_id":"other"}`),
 		Headers: http.Header{"Authorization": []string{"Bearer test-pass"}},
 	})

@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"path/filepath"
+	"testing"
+)
 
 func TestDefaultConfig(t *testing.T) {
 	got := defaultPluginConfig()
@@ -11,7 +14,7 @@ func TestDefaultConfig(t *testing.T) {
 		t.Fatal("persist state = false, want true")
 	}
 	if got.StateFile == "" {
-		t.Fatal("state file is empty, want default data/grok-inspection/bans.json")
+		t.Fatal("state file is empty, want default data/hk-grok-inspection/bans.json")
 	}
 	if !got.Enabled {
 		t.Fatal("enabled = false, want true")
@@ -96,5 +99,25 @@ func TestConfigureLoadsLifecycleYAML(t *testing.T) {
 	got := loadedConfig()
 	if got.FallbackHours != 72 || got.PersistState {
 		t.Fatalf("loaded config = %#v", got)
+	}
+}
+
+// After the plugin id rename (grok-inspection -> hk-grok-inspection) the default
+// state path moved to data/hk-grok-inspection/bans.json. Upgrades must auto-migrate
+// the pre-rename default via legacyBanStateCandidates.
+func TestLegacyBanStateCandidatesIncludePreRenameDefault(t *testing.T) {
+	want := filepath.Join("data", "grok-inspection", "bans.json")
+	found := false
+	for _, candidate := range legacyBanStateCandidates() {
+		if filepath.Clean(candidate) == filepath.Clean(want) {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("legacy candidates %v missing pre-rename default %q", legacyBanStateCandidates(), want)
+	}
+	if filepath.Clean(defaultBanStateFile()) == filepath.Clean(want) {
+		t.Fatalf("default state file %q still equals pre-rename path", defaultBanStateFile())
 	}
 }

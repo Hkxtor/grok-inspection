@@ -78,7 +78,8 @@ func TestPackageDataIsolationUsesTempDir(t *testing.T) {
 			}
 		}
 		slash := filepath.ToSlash(p)
-		if slash == "data/grok-inspection/bans.json" || slash == "data/grok-inspection/results.json" || slash == "data/grok-inspection/schedule.json" {
+		if slash == "data/hk-grok-inspection/bans.json" || slash == "data/hk-grok-inspection/results.json" || slash == "data/hk-grok-inspection/schedule.json" ||
+			slash == "data/grok-inspection/bans.json" || slash == "data/grok-inspection/results.json" || slash == "data/grok-inspection/schedule.json" {
 			t.Fatalf("still using repo-relative path: %s", p)
 		}
 	}
